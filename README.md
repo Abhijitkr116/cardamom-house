@@ -11,6 +11,7 @@ A modern, responsive café website inspired by the charm of Lisbon, Portugal. Ca
 - **Dietary Filters:** Filter items based on dietary preferences.
 - **Daily Specials:** Highlight the café's featured dish.
 - **Popular & Sold-Out Labels:** Clearly identify popular dishes and unavailable items.
+- **Light & Dark Mode:** Switch between light and dark themes, with the selected preference saved for future visits.
 - **Animated Navigation:** Smooth mobile menu transitions.
 - **Accessibility:** Keyboard navigation, visible focus indicators, and reduced-motion support.
 - **Modern UI:** Elegant typography, warm colours, and food photography.

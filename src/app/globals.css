@@ -1,38 +1,50 @@
-
 @import "tailwindcss";
 
-/*
- * Register the project's design tokens with Tailwind CSS v4.
- * These tokens make utilities such as bg-brand and text-brand available.
- */
+/* Enable Tailwind's dark: utilities using the .dark class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Register theme-aware design tokens with Tailwind CSS v4. */
 @theme inline {
-  --color-brand: #B45309;
-  --color-cream: #F8F3E9;
-  --color-espresso: #2D211B;
-  --color-spice: #8C4A2F;
-  --color-sand: #E8DCC8;
+  --color-brand: var(--accent);
+  --color-cream: var(--background);
+  --color-espresso: var(--foreground);
+  --color-spice: var(--spice);
+  --color-sand: var(--border);
 
   --font-sans: var(--font-body);
   --font-heading: var(--font-heading);
+
+  --color-panel: #2D211B;
 }
 
-/*
- * Define the default light-theme colours.
- * Components will reuse these variables instead of hardcoding colours.
- */
+/* Default light theme. */
 :root {
   color-scheme: light;
 
-  --background: #F8F3E9;
-  --foreground: #2D211B;
-  --surface: #FFFDF8;
-  --muted: #76675C;
-  --border: #E8DCC8;
-  --accent: #B45309;
+  --background: #f8f3e9;
+  --foreground: #2d211b;
+  --surface: #fffdf8;
+  --muted: #76675c;
+  --border: #e8dcc8;
+  --accent: #b45309;
+  --spice: #8c4a2f;
 
   --page-width: 1200px;
   --page-gutter: 1.25rem;
   --section-spacing: 5rem;
+}
+
+/* Dark theme colours, activated by adding .dark to the html element. */
+html.dark {
+  color-scheme: dark;
+
+  --background: #211915;
+  --foreground: #f8f0e5;
+  --surface: #30241e;
+  --muted: #c0b0a3;
+  --border: #514036;
+  --accent: #e5a04b;
+  --spice: #c47a53;
 }
 
 /* Apply consistent box sizing across the application. */
@@ -49,7 +61,7 @@ html {
   scroll-padding-top: 7rem;
 }
 
-/* Use the body font and shared theme colours across the site. */
+/* Use theme variables for the page background and text. */
 body {
   min-height: 100vh;
   margin: 0;
@@ -60,6 +72,9 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
 }
 
 /* Use the display font for headings by default. */
@@ -101,14 +116,10 @@ svg {
 /* Give printed pages a clean background and readable text. */
 @media print {
   body {
-    background: #FFFFFF;
+    background: #ffffff;
     color: #000000;
   }
 }
-
-
-
-
 
 /* Gentle entrance for the featured dish card. */
 @keyframes feature-enter {
@@ -127,7 +138,7 @@ svg {
   animation: feature-enter 550ms ease-out 80ms both;
 }
 
-/* Respect reduced-motion preferences across both entrance animations. */
+/* Respect reduced-motion preferences across entrance animations. */
 @media (prefers-reduced-motion: reduce) {
   .animate-hero-enter,
   .animate-feature-enter {

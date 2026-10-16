@@ -1,15 +1,15 @@
-
 import Image from "next/image";
 import {
   RiMapPin2Line,
   RiPhoneLine,
   RiInstagramLine,
-  RiTimeLine,
   RiArrowDownLine,
   RiArrowRightLine,
   RiCalendarCheckLine,
 } from "@remixicon/react";
 
+import OpenStatus from "@/components/OpenStatus";
+import HoursBlock from "@/components/HoursBlock";
 import MenuSection from "@/components/MenuSection";
 import Navbar from "@/components/Navbar";
 import { restaurantData } from "@/data";
@@ -55,6 +55,7 @@ export default function HomePage() {
           className="object-cover"
         />
 
+        {/* Dark overlay improves text readability over the background image. */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/25" />
 
         <div className="relative z-10 mx-auto flex min-h-[440px] max-w-7xl items-center px-5 py-14 sm:min-h-[500px] sm:px-8 sm:py-16 lg:min-h-[540px] lg:px-12">
@@ -71,6 +72,11 @@ export default function HomePage() {
               {restaurant.tagline}
             </p>
 
+            {/* Displays the current opening status using Europe/Lisbon time. */}
+            <div className="mt-5">
+              <OpenStatus hours={restaurant.hours} />
+            </div>
+
             <address className="mt-5 flex max-w-md items-start gap-2 text-sm not-italic leading-6 text-white/85 sm:mt-6">
               <RiMapPin2Line
                 size={19}
@@ -82,7 +88,7 @@ export default function HomePage() {
 
             <a
               href={`tel:${restaurant.phone.replace(/\s/g, "")}`}
-              className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-white underline decoration-white/50 underline-offset-4 transition hover:decoration-white"
+              className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-white underline decoration-white/50 underline-offset-4 transition hover:decoration-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
               <RiPhoneLine size={17} aria-hidden="true" />
               {restaurant.phone}
@@ -95,7 +101,7 @@ export default function HomePage() {
 
             <a
               href="#menu"
-              className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-full bg-amber-100 px-5 py-2.5 text-sm font-semibold text-espresso transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+              className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-full bg-amber-100 px-5 py-2.5 text-sm font-semibold text-stone-900 transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
               Explore the menu
               <RiArrowDownLine size={18} aria-hidden="true" />
@@ -110,7 +116,7 @@ export default function HomePage() {
           <section
             id="special"
             aria-labelledby="special-heading"
-            className="animate-feature-enter scroll-mt-24 overflow-hidden rounded-2xl border border-sand bg-white shadow-sm md:grid md:grid-cols-[0.9fr_1.1fr] lg:rounded-3xl"
+            className="animate-feature-enter scroll-mt-24 overflow-hidden rounded-2xl border border-sand bg-surface shadow-sm md:grid md:grid-cols-[0.9fr_1.1fr] lg:rounded-3xl"
           >
             <div className="relative aspect-[5/3] min-w-0 overflow-hidden bg-sand md:aspect-auto md:min-h-[300px] lg:min-h-[340px]">
               <Image
@@ -144,12 +150,12 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <p className="mt-3 max-w-xl text-sm leading-6 text-stone-600 sm:mt-4 sm:text-base sm:leading-7">
+              <p className="mt-3 max-w-xl text-sm leading-6 text-muted sm:mt-4 sm:text-base sm:leading-7">
                 {today_special.blurb}
               </p>
 
               {specialItem.description && (
-                <p className="mt-2 max-w-xl text-sm leading-6 text-stone-500">
+                <p className="mt-2 max-w-xl text-sm leading-6 text-muted">
                   {specialItem.description}
                 </p>
               )}
@@ -202,15 +208,20 @@ export default function HomePage() {
               Come Say Hello
             </h2>
 
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-stone-600 sm:text-base">
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted sm:text-base">
               Stop by for a relaxed brunch, a good cup of coffee, and a little
               taste of Lisbon.
             </p>
           </div>
 
-          <div className="mx-auto grid max-w-4xl gap-8 sm:grid-cols-2 sm:gap-10">
-            {/* Location and contact */}
-            <div className="rounded-2xl border border-sand bg-white p-5 sm:p-6">
+          {/* Weekly opening hours */}
+          <div className="mx-auto w-full max-w-7xl">
+            <HoursBlock hours={restaurant.hours} />
+          </div>
+
+          {/* Location and contact */}
+          <div className="mx-auto mt-8 max-w-xl px-4 sm:px-0">
+            <div className="rounded-2xl border border-sand bg-surface p-5 sm:p-6">
               <h3 className="flex items-center gap-2 text-lg font-semibold sm:text-xl">
                 <RiMapPin2Line
                   size={21}
@@ -220,7 +231,7 @@ export default function HomePage() {
                 Find Us
               </h3>
 
-              <address className="mt-4 flex items-start gap-2 text-sm not-italic leading-6 text-stone-600">
+              <address className="mt-4 flex items-start gap-2 text-sm not-italic leading-6 text-muted">
                 <RiMapPin2Line
                   size={17}
                   className="mt-0.5 shrink-0 text-brand"
@@ -231,13 +242,13 @@ export default function HomePage() {
 
               <a
                 href={`tel:${restaurant.phone.replace(/\s/g, "")}`}
-                className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm text-stone-600 underline decoration-sand underline-offset-4 transition hover:text-brand"
+                className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm text-muted underline decoration-sand underline-offset-4 transition hover:text-brand"
               >
                 <RiPhoneLine size={17} aria-hidden="true" />
                 {restaurant.phone}
               </a>
 
-              <p className="mt-1 flex items-center gap-2 text-sm text-stone-600">
+              <p className="mt-1 flex items-center gap-2 text-sm text-muted">
                 <RiInstagramLine
                   size={17}
                   className="text-brand"
@@ -245,32 +256,6 @@ export default function HomePage() {
                 />
                 {restaurant.instagram}
               </p>
-            </div>
-
-            {/* Weekly opening hours */}
-            <div className="rounded-2xl border border-sand bg-white p-5 sm:p-6">
-              <h3 className="flex items-center gap-2 text-lg font-semibold sm:text-xl">
-                <RiTimeLine
-                  size={21}
-                  className="text-brand"
-                  aria-hidden="true"
-                />
-                Opening Hours
-              </h3>
-
-              <dl className="mt-3 space-y-1 text-sm">
-                {Object.entries(restaurant.hours).map(([day, hours]) => (
-                  <div
-                    key={day}
-                    className="flex items-start justify-between gap-4 border-b border-sand/80 py-2.5 last:border-b-0"
-                  >
-                    <dt className="capitalize text-stone-600">{day}</dt>
-                    <dd className="text-right font-medium text-espresso">
-                      {hours}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
             </div>
           </div>
 
@@ -287,11 +272,13 @@ export default function HomePage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-sand bg-white/50 px-5 py-7 text-center text-sm text-stone-600">
+      <footer className="border-t border-sand bg-surface px-5 py-7 text-center text-sm text-muted">
         <p className="font-heading text-lg font-semibold text-espresso">
           {restaurant.name}
         </p>
+
         <p className="mt-1">{restaurant.tagline}</p>
+
         <p className="mt-4">
           © {new Date().getFullYear()} {restaurant.name}. Made with care in
           Lisbon.

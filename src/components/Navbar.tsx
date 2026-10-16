@@ -1,14 +1,22 @@
+
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { RiCloseLine, RiMenu3Line, RiArrowRightUpLine } from "@remixicon/react";
+import {
+  RiCloseLine,
+  RiMenu3Line,
+  RiArrowRightUpLine,
+  RiSunLine,
+  RiMoonLine,
+} from "@remixicon/react";
 
 /**
- * Render a responsive navigation bar with an animated mobile menu.
+ * Render a responsive navigation bar with an animated mobile menu and theme toggle.
  */
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
   const navLinks = [
@@ -17,6 +25,13 @@ export default function Navbar() {
     { label: "Menu", href: "#menu" },
     { label: "Visit Us", href: "#visit" },
   ];
+
+  /**
+   * Sync the toggle state with the theme applied by the root layout.
+   */
+  useEffect(() => {
+    setIsDarkMode(document.documentElement.classList.contains("dark"));
+  }, []);
 
   /**
    * Toggle the mobile navigation menu open or closed.
@@ -32,16 +47,35 @@ export default function Navbar() {
     setIsMenuOpen(false);
   }
 
+  /**
+   * Toggle the page theme and save the visitor's preference.
+   */
+  function handleThemeToggle() {
+    const nextIsDarkMode = !isDarkMode;
+
+    setIsDarkMode(nextIsDarkMode);
+    document.documentElement.classList.toggle("dark", nextIsDarkMode);
+
+    try {
+      localStorage.setItem(
+        "cardamom-house-theme",
+        nextIsDarkMode ? "dark" : "light",
+      );
+    } catch {
+      // The theme still works for this session if storage is unavailable.
+    }
+  }
+
   return (
     <nav
       aria-label="Main navigation"
-      className="sticky top-0 z-50 border-b border-sand bg-cream/95 backdrop-blur-md"
+      className="sticky top-0 z-50 border-b border-sand bg-cream/95 text-espresso backdrop-blur-md"
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-12">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-4 sm:gap-4 sm:px-8 lg:px-12">
         <a
           href="#home"
           onClick={handleNavClick}
-          className="relative z-20 font-heading text-xl font-semibold text-espresso transition-colors hover:text-brand"
+          className="relative z-20 whitespace-nowrap font-heading text-lg font-semibold text-espresso transition-colors hover:text-brand sm:text-xl"
         >
           Cardamom House
         </a>
@@ -59,23 +93,42 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Mobile and tablet menu button */}
-        <button
-          type="button"
-          onClick={handleMenuToggle}
-          aria-label={
-            isMenuOpen ? "Close navigation menu" : "Open navigation menu"
-          }
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-navigation"
-          className="relative z-20 inline-flex size-11 items-center justify-center rounded-full border border-sand text-espresso transition-colors hover:bg-sand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand lg:hidden"
-        >
-          {isMenuOpen ? (
-            <RiCloseLine size={23} aria-hidden="true" />
-          ) : (
-            <RiMenu3Line size={23} aria-hidden="true" />
-          )}
-        </button>
+        {/* Theme toggle and mobile navigation button */}
+        <div className="relative z-20 flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={handleThemeToggle}
+            aria-label={
+              isDarkMode ? "Switch to light mode" : "Switch to dark mode"
+            }
+            aria-pressed={isDarkMode}
+            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+            className="inline-flex size-11 items-center justify-center rounded-full border border-sand text-espresso transition-colors hover:bg-sand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            {isDarkMode ? (
+              <RiSunLine size={21} aria-hidden="true" />
+            ) : (
+              <RiMoonLine size={21} aria-hidden="true" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleMenuToggle}
+            aria-label={
+              isMenuOpen ? "Close navigation menu" : "Open navigation menu"
+            }
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-navigation"
+            className="inline-flex size-11 items-center justify-center rounded-full border border-sand text-espresso transition-colors hover:bg-sand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand lg:hidden"
+          >
+            {isMenuOpen ? (
+              <RiCloseLine size={23} aria-hidden="true" />
+            ) : (
+              <RiMenu3Line size={23} aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Animated mobile navigation panel */}
@@ -87,10 +140,10 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
             transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-            className="absolute inset-x-0 top-full border-b border-sand bg-cream px-5 pb-5 pt-2 shadow-lg lg:hidden"
+            className="absolute inset-x-0 top-full border-b border-sand bg-cream px-5 pb-5 pt-2 text-espresso shadow-lg lg:hidden"
           >
             <div className="mx-auto max-w-7xl">
-              {navLinks.map((link, index) => (
+              {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}

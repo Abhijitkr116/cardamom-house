@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -38,7 +39,7 @@ function getTagLabel(tag: DietaryTag): string {
 }
 
 /**
- * Display a compact menu card with separated status badges and price.
+ * Display a responsive menu card with theme-aware colours and status badges.
  */
 function MenuItemCard({
   item,
@@ -63,8 +64,10 @@ function MenuItemCard({
         delay: reduceMotion ? 0 : Math.min(index * 0.04, 0.16),
         ease: "easeOut",
       }}
-      className={`flex min-w-0 gap-3 rounded-xl border border-sand/80 bg-white p-3 transition-colors duration-200 sm:gap-4 sm:p-4 ${
-        isSoldOut ? "bg-stone-50" : "hover:border-brand/40"
+      className={`flex min-w-0 gap-3 rounded-xl border p-3 transition-colors duration-200 sm:gap-4 sm:p-4 ${
+        isSoldOut
+          ? "border-sand bg-sand/30"
+          : "border-sand/80 bg-surface hover:border-brand/40"
       }`}
     >
       {imageSrc && (
@@ -74,7 +77,9 @@ function MenuItemCard({
             alt={item.name}
             fill
             sizes="(max-width: 639px) 76px, 96px"
-            className={`object-cover ${isSoldOut ? "grayscale-[35%]" : ""}`}
+            className={`object-cover transition-all duration-300 ${
+              isSoldOut ? "grayscale opacity-60" : ""
+            }`}
           />
         </div>
       )}
@@ -95,14 +100,14 @@ function MenuItemCard({
         {(isPopular || isSoldOut) && (
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             {isPopular && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold leading-4 text-amber-800 ring-1 ring-inset ring-amber-200 sm:text-xs">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold leading-4 text-amber-900 ring-1 ring-inset ring-amber-300 dark:bg-amber-950/60 dark:text-amber-200 dark:ring-amber-800 sm:text-xs">
                 <RiStarFill aria-hidden="true" className="h-3 w-3" />
                 Popular
               </span>
             )}
 
             {isSoldOut && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold leading-4 text-stone-600 ring-1 ring-inset ring-stone-200 sm:text-xs">
+              <span className="inline-flex items-center gap-1 rounded-full bg-sand/70 px-2 py-0.5 text-[10px] font-semibold leading-4 text-espresso ring-1 ring-inset ring-sand sm:text-xs">
                 <RiCloseLine aria-hidden="true" className="h-3 w-3" />
                 Sold out
               </span>
@@ -111,7 +116,7 @@ function MenuItemCard({
         )}
 
         {item.description && (
-          <p className="mt-2 line-clamp-3 text-xs leading-5 text-stone-600 sm:text-sm sm:leading-6">
+          <p className="mt-2 line-clamp-3 text-xs leading-5 text-muted sm:text-sm sm:leading-6">
             {item.description}
           </p>
         )}
@@ -163,7 +168,8 @@ export default function MenuSection({
    */
   const filteredCategories = categories
     .filter(
-      (category) => activeCategory === "all" || category.id === activeCategory,
+      (category) =>
+        activeCategory === "all" || category.id === activeCategory,
     )
     .map((category) => ({
       ...category,
@@ -208,12 +214,12 @@ export default function MenuSection({
 
         <h2
           id="menu-heading"
-          className="mt-2 text-3xl font-medium leading-tight sm:mt-3 sm:text-4xl lg:text-5xl"
+          className="mt-2 text-3xl font-medium leading-tight text-espresso sm:mt-3 sm:text-4xl lg:text-5xl"
         >
           Our Menu
         </h2>
 
-        <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-stone-600 sm:mt-3 sm:text-sm sm:leading-6">
+        <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-muted sm:mt-3 sm:text-sm sm:leading-6">
           Seasonal favourites, carefully made coffee, and slow brunches worth
           lingering over.
         </p>
@@ -228,10 +234,10 @@ export default function MenuSection({
           Find your favourite
         </label>
 
-        <div className="flex min-w-0 items-center gap-2.5 rounded-xl border border-sand bg-white px-3 py-2.5 transition-colors focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/10 sm:rounded-2xl sm:px-4 sm:py-3">
+        <div className="flex min-w-0 items-center gap-2.5 rounded-xl border border-sand bg-surface px-3 py-2.5 transition-colors focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/10 sm:rounded-2xl sm:px-4 sm:py-3">
           <RiSearchLine
             aria-hidden="true"
-            className="h-5 w-5 shrink-0 text-stone-500"
+            className="h-5 w-5 shrink-0 text-muted"
           />
 
           <input
@@ -240,7 +246,7 @@ export default function MenuSection({
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search dishes, coffee..."
-            className="min-w-0 flex-1 bg-transparent text-sm text-espresso !outline-none placeholder:text-stone-400"
+            className="min-w-0 flex-1 bg-transparent text-sm text-espresso !outline-none placeholder:text-muted"
           />
 
           {searchQuery && (
@@ -258,7 +264,7 @@ export default function MenuSection({
 
       {/* Horizontally scrollable category controls on narrow screens. */}
       <div className="mb-4">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-stone-500 sm:text-xs">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted sm:text-xs">
           Explore categories
         </p>
 
@@ -274,7 +280,7 @@ export default function MenuSection({
             className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition-colors sm:text-sm ${
               activeCategory === "all"
                 ? "border-brand bg-brand text-white"
-                : "border-sand bg-white text-espresso hover:border-brand"
+                : "border-sand bg-surface text-espresso hover:border-brand"
             }`}
           >
             <RiRestaurantLine aria-hidden="true" className="h-4 w-4" />
@@ -290,7 +296,7 @@ export default function MenuSection({
               className={`min-h-9 shrink-0 rounded-full border px-3.5 py-2 text-xs font-medium transition-colors sm:text-sm ${
                 activeCategory === category.id
                   ? "border-brand bg-brand text-white"
-                  : "border-sand bg-white text-espresso hover:border-brand"
+                  : "border-sand bg-surface text-espresso hover:border-brand"
               }`}
             >
               {category.name}
@@ -301,14 +307,14 @@ export default function MenuSection({
 
       {/* Keep dietary controls compact and easy to scan. */}
       <div className="mb-7 sm:mb-9">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-stone-500 sm:text-xs">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted sm:text-xs">
           Dietary preferences
         </p>
 
         <div
           role="group"
           aria-label="Filter by dietary preference"
-          className="flex flex-wrap gap-2 "
+          className="flex flex-wrap gap-2"
         >
           {dietaryFilters.map((diet) => (
             <button
@@ -319,7 +325,7 @@ export default function MenuSection({
               className={`inline-flex min-h-8 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors sm:px-3 sm:text-sm ${
                 activeDiet === diet.value
                   ? "border-spice bg-spice text-white"
-                  : "border-sand bg-white text-stone-700 hover:border-spice"
+                  : "border-sand bg-surface text-espresso hover:border-spice"
               }`}
             >
               {diet.value === "V" && (
@@ -344,18 +350,18 @@ export default function MenuSection({
             key={category.id}
             id={`category-${category.id}`}
             aria-labelledby={`heading-${category.id}`}
-            className="scroll-mt-24 rounded-2xl border border-sand/80 bg-white p-3.5 sm:p-6 lg:p-8"
+            className="scroll-mt-24 rounded-2xl border border-sand/80 bg-surface p-3.5 sm:p-6 lg:p-8"
           >
             <div className="mb-4 border-b border-sand pb-3.5 sm:mb-5 sm:pb-4">
               <h3
                 id={`heading-${category.id}`}
-                className="text-xl font-medium leading-tight sm:text-2xl lg:text-3xl"
+                className="text-xl font-medium leading-tight text-espresso sm:text-2xl lg:text-3xl"
               >
                 {category.name}
               </h3>
 
               {category.description && (
-                <p className="mt-1.5 text-xs leading-5 text-stone-600 sm:text-sm sm:leading-6">
+                <p className="mt-1.5 text-xs leading-5 text-muted sm:text-sm sm:leading-6">
                   {category.description}
                 </p>
               )}
@@ -377,18 +383,18 @@ export default function MenuSection({
         {filteredCategories.length === 0 && (
           <div
             role="status"
-            className="rounded-2xl border border-sand bg-white px-4 py-9 text-center sm:px-5 sm:py-12"
+            className="rounded-2xl border border-sand bg-surface px-4 py-9 text-center sm:px-5 sm:py-12"
           >
             <RiSearchLine
               aria-hidden="true"
-              className="mx-auto h-8 w-8 text-stone-400"
+              className="mx-auto h-8 w-8 text-muted"
             />
 
             <h3 className="mt-3 text-lg font-semibold text-espresso sm:text-xl">
               No matching dishes found
             </h3>
 
-            <p className="mt-2 text-sm leading-6 text-stone-600">
+            <p className="mt-2 text-sm leading-6 text-muted">
               Try another search, category, or dietary preference.
             </p>
 
