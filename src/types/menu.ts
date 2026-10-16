@@ -4,6 +4,7 @@
  */
 export type DietaryTag = "V" | "GF" | "spicy";
 
+
 /**
  * Represents a single menu item.
  * Some items, such as sides, do not have descriptions.

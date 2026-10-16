@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-type OpeningHours = Record<string, string>;
+import type { RestaurantHours } from "@/types/menu";
 
 type OpenStatusProps = {
-  hours: OpeningHours;
+  hours: RestaurantHours;
 };
 
 type ParsedHours = {
@@ -31,7 +30,7 @@ function getLisbonTime() {
   );
 
   return {
-    day: values.weekday.toLowerCase(),
+    day: values.weekday.toLowerCase() as keyof RestaurantHours,
     minutes: Number(values.hour) * 60 + Number(values.minute),
   };
 }
@@ -53,7 +52,12 @@ function parseHours(schedule: string): ParsedHours | null {
   const closeMinute = Number(matches[4]);
 
   // Validate that the schedule contains valid 24-hour clock times.
-  if (openHour > 23 || closeHour > 23 || openMinute > 59 || closeMinute > 59) {
+  if (
+    openHour > 23 ||
+    closeHour > 23 ||
+    openMinute > 59 ||
+    closeMinute > 59
+  ) {
     return null;
   }
 
@@ -83,10 +87,10 @@ function formatTime(minutes: number) {
 /**
  * Calculate whether the café is open and find its next opening time.
  */
-function getStatus(hours: OpeningHours) {
+function getStatus(hours: RestaurantHours) {
   const now = getLisbonTime();
 
-  const days = [
+  const days: (keyof RestaurantHours)[] = [
     "monday",
     "tuesday",
     "wednesday",
@@ -126,7 +130,8 @@ function getStatus(hours: OpeningHours) {
     // If today's opening time has passed, look for the next day instead.
     if (offset === 0 && now.minutes >= schedule.open) continue;
 
-    const dayLabel = offset === 0 ? "today" : offset === 1 ? "tomorrow" : day;
+    const dayLabel =
+      offset === 0 ? "today" : offset === 1 ? "tomorrow" : day;
 
     return {
       isOpen: false,

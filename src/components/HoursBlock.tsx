@@ -1,194 +1,100 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { RiTimeLine } from "@remixicon/react";
-
-type OpeningHours = Record<string, string>;
+import { motion } from "motion/react";
+import type { RestaurantHours } from "@/types/menu";
 
 type HoursBlockProps = {
-  hours: OpeningHours;
+  hours: RestaurantHours;
 };
 
-const WEEKDAYS = [
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-  "sunday",
+// Defines the valid weekday keys supported by RestaurantHours.
+const days: { key: keyof RestaurantHours; label: string }[] = [
+  { key: "monday", label: "Monday" },
+  { key: "tuesday", label: "Tuesday" },
+  { key: "wednesday", label: "Wednesday" },
+  { key: "thursday", label: "Thursday" },
+  { key: "friday", label: "Friday" },
+  { key: "saturday", label: "Saturday" },
+  { key: "sunday", label: "Sunday" },
 ];
 
-/**
- * Get today's weekday according to Lisbon's local time.
- */
-function getLisbonWeekday() {
-  return new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Europe/Lisbon",
+// Displays the restaurant's weekly opening hours with theme-aware styling.
+export default function HoursBlock({ hours }: HoursBlockProps) {
+  // Gets today's weekday using the browser's local date.
+  const today = new Intl.DateTimeFormat("en", {
     weekday: "long",
   })
     .format(new Date())
     .toLowerCase();
-}
-
-/**
- * Display the café's weekly opening schedule with today's row highlighted.
- */
-export default function HoursBlock({ hours }: HoursBlockProps) {
-  const [today, setToday] = useState<string | null>(null);
-
-  useEffect(() => {
-    /**
-     * Update the highlighted weekday using Lisbon's timezone.
-     */
-    function updateToday() {
-      setToday(getLisbonWeekday());
-    }
-
-    updateToday();
-
-    // Refresh periodically in case the page stays open across midnight.
-    const intervalId = window.setInterval(updateToday, 60_000);
-
-    return () => window.clearInterval(intervalId);
-  }, []);
 
   return (
     <section
       id="hours"
-      aria-labelledby="hours-heading"
-      className="scroll-mt-24 py-8 sm:py-12"
+      className="bg-cream px-5 py-20 text-espresso transition-colors duration-300 sm:px-8"
     >
-      <div className="overflow-hidden rounded-3xl border border-sand bg-surface shadow-sm">
-        <div className="grid md:grid-cols-[0.8fr_1.2fr]">
-          {/* Intro panel */}
-          <div className="flex flex-col justify-center bg-panel p-6 text-white sm:p-9 lg:p-10">
-            <span className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-white/10 text-amber-300">
-              <RiTimeLine size={26} aria-hidden="true" />
-            </span>
+      <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-2 md:gap-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="rounded-2xl bg-panel p-8 text-white sm:p-10"
+        >
+          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-amber-400">
+            Come visit us
+          </p>
 
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
-              Plan your visit
-            </p>
+          <h2 className="mb-5 font-heading text-3xl font-semibold sm:text-4xl">
+            Good food, slow mornings.
+          </h2>
 
-            <h2
-              id="hours-heading"
-              className="mt-3 font-heading text-3xl font-medium text-white sm:text-4xl"
-            >
-              Weekly Hours
-            </h2>
+          <p className="leading-7 text-white/75">
+            Join us for a relaxed brunch, freshly brewed coffee, and comforting
+            flavours inspired by our love of good food.
+          </p>
+        </motion.div>
 
-            <p className="mt-3 max-w-sm text-sm leading-6 text-white/75">
-              Your favourite brunch spot in Lisbon. Check our hours and find the
-              best time to stop by.
-            </p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-brand">
+            Opening hours
+          </p>
 
-            <div className="mt-6 flex flex-wrap gap-4 text-xs text-white/80">
-              <span className="inline-flex items-center gap-2">
-                <span
-                  aria-hidden="true"
-                  className="size-2 rounded-full bg-green-400"
-                />
-                Open
-              </span>
+          <h3 className="mb-6 font-heading text-2xl font-semibold">
+            Plan your visit
+          </h3>
 
-              <span className="inline-flex items-center gap-2">
-                <span
-                  aria-hidden="true"
-                  className="size-2 rounded-full bg-stone-400"
-                />
-                Closed
-              </span>
-            </div>
+          <div className="divide-y divide-sand rounded-xl border border-sand bg-surface px-5">
+            {days.map(({ key, label }) => {
+              const isToday = today === key;
+
+              return (
+                <div
+                  key={key}
+                  className={`flex items-center justify-between gap-4 py-4 ${
+                    isToday
+                      ? "font-semibold text-brand"
+                      : "text-espresso"
+                  }`}
+                >
+                  <span>{label}</span>
+                  <span className="text-right text-sm sm:text-base">
+                    {hours[key]}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Weekly schedule */}
-          <div className="bg-surface p-4 sm:p-7 lg:p-8">
-            <div className="mb-3 flex items-center justify-between gap-3 px-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted">
-                Opening schedule
-              </p>
-
-              {today && (
-                <span className="text-xs text-muted">Lisbon local time</span>
-              )}
-            </div>
-
-            <dl className="space-y-1">
-              {WEEKDAYS.map((day) => {
-                const schedule = hours[day] ?? "Hours unavailable";
-                const isToday = today === day;
-                const isClosed = /^closed$/i.test(schedule.trim());
-                const isAvailable = /\d{1,2}:\d{2}/.test(schedule);
-
-                return (
-                  <div
-                    key={day}
-                    className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-3 py-3 transition-colors sm:px-4 ${
-                      isToday
-                        ? "border-brand/40 bg-cream shadow-sm"
-                        : "border-transparent"
-                    }`}
-                  >
-                    <dt className="flex min-w-0 items-center gap-2.5">
-                      <span
-                        aria-hidden="true"
-                        className={`size-2 shrink-0 rounded-full ${
-                          isClosed
-                            ? "bg-stone-400"
-                            : isAvailable
-                              ? "bg-green-500"
-                              : "bg-amber-400"
-                        }`}
-                      />
-
-                      <span
-                        className={`capitalize ${
-                          isToday
-                            ? "font-bold text-espresso"
-                            : isClosed
-                              ? "text-muted"
-                              : "font-medium text-espresso"
-                        }`}
-                      >
-                        {day}
-                      </span>
-
-                      {isToday && (
-                        <span className="rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-                          Today
-                        </span>
-                      )}
-                    </dt>
-
-                    <dd
-                      className={`shrink-0 text-right text-sm tabular-nums ${
-                        isClosed
-                          ? "font-medium text-muted"
-                          : isToday
-                            ? "font-semibold text-brand"
-                            : "font-medium text-espresso"
-                      }`}
-                    >
-                      {isClosed ? (
-                        <span className="rounded-md bg-sand/50 px-2.5 py-1 text-xs text-espresso">
-                          Closed
-                        </span>
-                      ) : (
-                        schedule
-                      )}
-                    </dd>
-                  </div>
-                );
-              })}
-            </dl>
-
-            <p className="mt-4 border-t border-sand pt-4 text-xs leading-5 text-muted">
-              Hours may change on special occasions. Please contact us if
-              you&apos;re planning a special visit.
-            </p>
-          </div>
-        </div>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            Opening hours may vary on public holidays. Please contact us if
+            you are planning a special visit.
+          </p>
+        </motion.div>
       </div>
     </section>
   );
