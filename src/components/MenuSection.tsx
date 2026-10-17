@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -39,7 +38,7 @@ function getTagLabel(tag: DietaryTag): string {
 }
 
 /**
- * Display a responsive menu card with theme-aware colours and status badges.
+ * Display a menu card with its image, price, dietary tags, and availability.
  */
 function MenuItemCard({
   item,
@@ -64,9 +63,10 @@ function MenuItemCard({
         delay: reduceMotion ? 0 : Math.min(index * 0.04, 0.16),
         ease: "easeOut",
       }}
+      aria-label={isSoldOut ? `${item.name}, sold out` : item.name}
       className={`flex min-w-0 gap-3 rounded-xl border p-3 transition-colors duration-200 sm:gap-4 sm:p-4 ${
         isSoldOut
-          ? "border-sand bg-sand/30"
+          ? "border-sand bg-sand/40"
           : "border-sand/80 bg-surface hover:border-brand/40"
       }`}
     >
@@ -87,11 +87,19 @@ function MenuItemCard({
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Keep the dish name and price separate from status badges. */}
         <div className="flex min-w-0 items-start justify-between gap-2">
-          <h4 className="min-w-0 flex-1 break-words text-sm font-semibold leading-5 text-espresso sm:text-base">
+          <h4
+            className={`min-w-0 flex-1 break-words text-sm font-semibold leading-5 sm:text-base ${
+              isSoldOut ? "text-muted" : "text-espresso"
+            }`}
+          >
             {item.name}
           </h4>
 
-          <p className="shrink-0 whitespace-nowrap text-sm font-bold tabular-nums text-brand sm:text-base">
+          <p
+            className={`shrink-0 whitespace-nowrap text-sm font-bold tabular-nums sm:text-base ${
+              isSoldOut ? "text-muted line-through" : "text-brand"
+            }`}
+          >
             €{item.price.toFixed(2)}
           </p>
         </div>
@@ -168,8 +176,7 @@ export default function MenuSection({
    */
   const filteredCategories = categories
     .filter(
-      (category) =>
-        activeCategory === "all" || category.id === activeCategory,
+      (category) => activeCategory === "all" || category.id === activeCategory,
     )
     .map((category) => ({
       ...category,
@@ -178,6 +185,7 @@ export default function MenuSection({
           activeDiet === "all" || item.tags.includes(activeDiet);
 
         const query = searchQuery.trim().toLowerCase();
+
         const matchesSearch =
           item.name.toLowerCase().includes(query) ||
           (item.description?.toLowerCase().includes(query) ?? false);
@@ -206,7 +214,7 @@ export default function MenuSection({
       transition={{ duration: reduceMotion ? 0 : 0.4, ease: "easeOut" }}
       className="mt-12 scroll-mt-24 sm:mt-16 lg:mt-20"
     >
-      {/* Use smaller typography and tighter spacing on mobile. */}
+      {/* Menu section introduction. */}
       <div className="mb-6 text-center sm:mb-8">
         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand sm:text-xs sm:tracking-[0.25em]">
           Fresh from our kitchen
@@ -225,7 +233,7 @@ export default function MenuSection({
         </p>
       </div>
 
-      {/* Compact search field with a Remix Icon and a clear action. */}
+      {/* Search field with a clear action. */}
       <div className="mx-auto mb-5 max-w-xl sm:mb-6">
         <label
           htmlFor="menu-search"
@@ -305,7 +313,7 @@ export default function MenuSection({
         </div>
       </div>
 
-      {/* Keep dietary controls compact and easy to scan. */}
+      {/* Dietary preference controls. */}
       <div className="mb-7 sm:mb-9">
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted sm:text-xs">
           Dietary preferences

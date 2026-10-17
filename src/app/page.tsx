@@ -15,6 +15,12 @@ import Navbar from "@/components/Navbar";
 import { restaurantData } from "@/data";
 import { restaurantImages, menuItemImages } from "@/data/images";
 
+type DemoState = "open" | "closed" | "special-sold-out";
+
+type HomePageProps = {
+  searchParams: Promise<{ state?: string | string[] }>;
+};
+
 /**
  * Convert menu tags into visitor-friendly labels.
  */
@@ -25,17 +31,52 @@ function getTagLabel(tag: string): string {
 }
 
 /**
- * Render the complete Cardamom House café website.
+ * Accept supported demo states and default to "open".
  */
-export default function HomePage() {
+function getDemoState(value: string | string[] | undefined): DemoState {
+  const state = Array.isArray(value) ? value[0] : value;
+
+  if (state === "closed" || state === "special-sold-out" || state === "open") {
+    return state;
+  }
+
+  return "open";
+}
+
+/**
+ * Render the café homepage for the selected URL demo state.
+ */
+export default async function HomePage({ searchParams }: HomePageProps) {
   const { restaurant, categories, today_special } = restaurantData;
+  const params = await searchParams;
+  const demoState = getDemoState(params.state);
 
   /**
-   * Find the featured dish by its ID in the supplied menu data.
+   * Create a demo-only menu copy and mark the featured dish sold out
+   * in the special-sold-out scenario without changing the source JSON.
    */
-  const specialItem = categories
+  const displayCategories = categories.map((category) => ({
+    ...category,
+    items: category.items.map((item) => ({
+      ...item,
+      sold_out:
+        demoState === "special-sold-out" &&
+        (item.name === "Saffron French Toast" ||
+          item.id === today_special.item_id)
+          ? true
+          : item.sold_out,
+    })),
+  }));
+
+  /**
+   * Find the featured dish in the displayed menu so its callout and
+   * menu card share the same availability status.
+   */
+  const specialItem = displayCategories
     .flatMap((category) => category.items)
     .find((item) => item.id === today_special.item_id);
+
+  const specialIsSoldOut = specialItem?.sold_out === true;
 
   return (
     <main className="min-h-screen overflow-x-clip bg-cream text-espresso">
@@ -55,7 +96,7 @@ export default function HomePage() {
           className="object-cover"
         />
 
-        {/* Dark overlay improves text readability over the background image. */}
+        {/* Improve contrast between the hero text and background image. */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/25" />
 
         <div className="relative z-10 mx-auto flex min-h-[440px] max-w-7xl items-center px-5 py-14 sm:min-h-[500px] sm:px-8 sm:py-16 lg:min-h-[540px] lg:px-12">
@@ -72,10 +113,26 @@ export default function HomePage() {
               {restaurant.tagline}
             </p>
 
-            {/* Displays the current opening status using Europe/Lisbon time. */}
+            {/* Show the simulated opening status for the chosen scenario. */}
             <div className="mt-5">
-              <OpenStatus hours={restaurant.hours} />
+              <OpenStatus hours={restaurant.hours} demoState={demoState} />
             </div>
+
+            {/* Make the closed scenario clear and friendly. */}
+            {demoState === "closed" && (
+              <div
+                role="status"
+                className="mt-4 max-w-lg rounded-xl border border-white/25 bg-black/35 p-4 backdrop-blur-sm"
+              >
+                <p className="font-semibold text-white">
+                  We&apos;re closed today
+                </p>
+                <p className="mt-1 text-sm leading-6 text-white/85">
+                  Thanks for stopping by. We&apos;ll welcome you back when we
+                  reopen.
+                </p>
+              </div>
+            )}
 
             <address className="mt-5 flex max-w-md items-start gap-2 text-sm not-italic leading-6 text-white/85 sm:mt-6">
               <RiMapPin2Line
@@ -111,12 +168,60 @@ export default function HomePage() {
       </header>
 
       <div className="mx-auto w-full max-w-7xl px-4 py-9 sm:px-8 sm:py-14 lg:px-12 lg:py-16">
+        {/* URL links make it easy to switch between the three demo states. */}
+        <nav
+          aria-label="Demo scenarios"
+          className="mb-8 flex flex-wrap items-center justify-center gap-2"
+        >
+          <span className="mr-1 text-xs font-medium text-muted">
+            Preview state:
+          </span>
+
+          <a
+            href={`/?state=open`}
+            aria-current={demoState === "open" ? "page" : undefined}
+            className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
+              demoState === "open"
+                ? "border-brand bg-brand text-white"
+                : "border-sand bg-surface text-espresso hover:border-brand"
+            }`}
+          >
+            Open
+          </a>
+
+          <a
+            href={`/?state=closed`}
+            aria-current={demoState === "closed" ? "page" : undefined}
+            className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
+              demoState === "closed"
+                ? "border-brand bg-brand text-white"
+                : "border-sand bg-surface text-espresso hover:border-brand"
+            }`}
+          >
+            Closed
+          </a>
+
+          <a
+            href={`/?state=special-sold-out`}
+            aria-current={demoState === "special-sold-out" ? "page" : undefined}
+            className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
+              demoState === "special-sold-out"
+                ? "border-brand bg-brand text-white"
+                : "border-sand bg-surface text-espresso hover:border-brand"
+            }`}
+          >
+            Special sold out
+          </a>
+        </nav>
+
         {/* Today's featured dish */}
         {specialItem && (
           <section
             id="special"
             aria-labelledby="special-heading"
-            className="animate-feature-enter scroll-mt-24 overflow-hidden rounded-2xl border border-sand bg-surface shadow-sm md:grid md:grid-cols-[0.9fr_1.1fr] lg:rounded-3xl"
+            className={`animate-feature-enter scroll-mt-24 overflow-hidden rounded-2xl border border-sand bg-surface shadow-sm md:grid md:grid-cols-[0.9fr_1.1fr] lg:rounded-3xl ${
+              specialIsSoldOut ? "opacity-90" : ""
+            }`}
           >
             <div className="relative aspect-[5/3] min-w-0 overflow-hidden bg-sand md:aspect-auto md:min-h-[300px] lg:min-h-[340px]">
               <Image
@@ -127,14 +232,23 @@ export default function HomePage() {
                 alt={specialItem.name}
                 fill
                 sizes="(max-width: 767px) 100vw, (max-width: 1023px) 45vw, 40vw"
-                className="object-cover transition-transform duration-500 hover:scale-[1.03]"
+                className={`object-cover transition-transform duration-500 ${
+                  specialIsSoldOut
+                    ? "grayscale opacity-60"
+                    : "hover:scale-[1.03]"
+                }`}
               />
             </div>
 
             <div className="flex min-w-0 flex-col justify-center p-5 sm:p-7 md:p-8 lg:p-10">
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand sm:text-sm">
+              <p className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand sm:text-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand" />
                 Today&apos;s special
+                {specialIsSoldOut && (
+                  <span className="rounded-full bg-sand px-2.5 py-1 text-[10px] font-semibold tracking-normal text-espresso ring-1 ring-inset ring-sand sm:text-xs">
+                    Sold out
+                  </span>
+                )}
               </p>
 
               <div className="mt-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
@@ -145,22 +259,26 @@ export default function HomePage() {
                   {specialItem.name}
                 </h2>
 
-                <p className="shrink-0 whitespace-nowrap pt-1 text-base font-semibold tabular-nums text-brand sm:text-lg">
-                  €{specialItem.price.toFixed(2)}
-                </p>
+                {!specialIsSoldOut && (
+                  <p className="shrink-0 whitespace-nowrap pt-1 text-base font-semibold tabular-nums text-brand sm:text-lg">
+                    €{specialItem.price.toFixed(2)}
+                  </p>
+                )}
               </div>
 
               <p className="mt-3 max-w-xl text-sm leading-6 text-muted sm:mt-4 sm:text-base sm:leading-7">
-                {today_special.blurb}
+                {specialIsSoldOut
+                  ? "Today's special has sold out. We're sorry we missed you on this one, but there are plenty of other brunch favourites to discover."
+                  : today_special.blurb}
               </p>
 
-              {specialItem.description && (
+              {!specialIsSoldOut && specialItem.description && (
                 <p className="mt-2 max-w-xl text-sm leading-6 text-muted">
                   {specialItem.description}
                 </p>
               )}
 
-              {specialItem.tags.length > 0 && (
+              {!specialIsSoldOut && specialItem.tags.length > 0 && (
                 <ul
                   aria-label={`Dietary information for ${specialItem.name}`}
                   className="mt-4 flex flex-wrap gap-2"
@@ -180,15 +298,15 @@ export default function HomePage() {
                 href="#menu"
                 className="mt-5 inline-flex min-h-11 w-fit items-center gap-2 text-sm font-semibold text-brand transition hover:text-spice"
               >
-                View full menu
+                {specialIsSoldOut ? "Explore other dishes" : "View full menu"}
                 <RiArrowRightLine size={18} aria-hidden="true" />
               </a>
             </div>
           </section>
         )}
 
-        {/* Menu heading, search, filters, and category sections */}
-        <MenuSection categories={categories} />
+        {/* Pass the simulated menu data to the menu component. */}
+        <MenuSection categories={displayCategories} />
 
         {/* Opening hours and contact details */}
         <section
@@ -214,12 +332,10 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Weekly opening hours */}
           <div className="mx-auto w-full max-w-7xl">
             <HoursBlock hours={restaurant.hours} />
           </div>
 
-          {/* Location and contact */}
           <div className="mx-auto mt-8 max-w-xl px-4 sm:px-0">
             <div className="rounded-2xl border border-sand bg-surface p-5 sm:p-6">
               <h3 className="flex items-center gap-2 text-lg font-semibold sm:text-xl">

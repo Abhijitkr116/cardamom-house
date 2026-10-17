@@ -1,43 +1,23 @@
-"use client";
 
-import { useEffect, useState } from "react";
 import type { RestaurantHours } from "@/types/menu";
+
+export type DemoState = "open" | "closed" | "special-sold-out";
 
 type OpenStatusProps = {
   hours: RestaurantHours;
+  demoState: DemoState;
 };
 
 type ParsedHours = {
   open: number;
   close: number;
   openText: string;
+  closeText: string;
 };
 
 /**
- * Get the current weekday and time in the Lisbon timezone.
- */
-function getLisbonTime() {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Europe/Lisbon",
-    weekday: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(new Date());
-
-  const values = Object.fromEntries(
-    parts.map((part) => [part.type, part.value]),
-  );
-
-  return {
-    day: values.weekday.toLowerCase() as keyof RestaurantHours,
-    minutes: Number(values.hour) * 60 + Number(values.minute),
-  };
-}
-
-/**
- * Parse opening hours such as "08:00 – 15:00".
- * Return null when the café is closed or the schedule is invalid.
+ * Parse a daily schedule such as "08:00 – 15:00".
+ * Return null if the schedule is closed or invalid.
  */
 function parseHours(schedule: string): ParsedHours | null {
   const matches = schedule.match(
@@ -51,7 +31,7 @@ function parseHours(schedule: string): ParsedHours | null {
   const closeHour = Number(matches[3]);
   const closeMinute = Number(matches[4]);
 
-  // Validate that the schedule contains valid 24-hour clock times.
+  // Validate the 24-hour clock values.
   if (
     openHour > 23 ||
     closeHour > 23 ||
@@ -64,122 +44,77 @@ function parseHours(schedule: string): ParsedHours | null {
   const open = openHour * 60 + openMinute;
   const close = closeHour * 60 + closeMinute;
 
-  // This component currently supports same-day opening schedules.
+  // This parser supports opening and closing on the same day.
   if (close <= open) return null;
 
   return {
     open,
     close,
     openText: `${String(openHour).padStart(2, "0")}:${String(openMinute).padStart(2, "0")}`,
+    closeText: `${String(closeHour).padStart(2, "0")}:${String(closeMinute).padStart(2, "0")}`,
   };
 }
 
 /**
- * Format minutes since midnight as HH:MM.
+ * Calculate the displayed status for each demo scenario.
  */
-function formatTime(minutes: number) {
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
+function getDemoStatus(
+  hours: RestaurantHours,
+  demoState: DemoState,
+) {
+  const tuesday = parseHours(hours.tuesday);
 
-  return `${String(hours).padStart(2, "0")}:${String(remainingMinutes).padStart(2, "0")}`;
-}
-
-/**
- * Calculate whether the café is open and find its next opening time.
- */
-function getStatus(hours: RestaurantHours) {
-  const now = getLisbonTime();
-
-  const days: (keyof RestaurantHours)[] = [
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday",
-  ];
-
-  const currentDayIndex = days.indexOf(now.day);
-
-  if (currentDayIndex === -1) {
+  // Simulate Monday as closed and show Tuesday's opening time.
+  if (demoState === "closed") {
     return {
       isOpen: false,
-      message: "Opening status temporarily unavailable",
+      message: tuesday
+        ? `Closed · opens Tuesday at ${tuesday.openText}`
+        : "Closed · next opening time unavailable",
     };
   }
 
-  const today = parseHours(hours[now.day] ?? "");
+  // Simulate Tuesday at 11:30 for both open scenarios.
+  const simulatedMinutes = 11 * 60 + 30;
 
-  // Check whether the café is currently open.
-  if (today && now.minutes >= today.open && now.minutes < today.close) {
+  if (
+    tuesday &&
+    simulatedMinutes >= tuesday.open &&
+    simulatedMinutes < tuesday.close
+  ) {
     return {
       isOpen: true,
-      message: `Open now · until ${formatTime(today.close)}`,
+      message: `Open now · until ${tuesday.closeText}`,
     };
   }
 
-  // Find the next opening time, checking today and the following six days.
-  for (let offset = 0; offset < 7; offset++) {
-    const dayIndex = (currentDayIndex + offset) % 7;
-    const day = days[dayIndex];
-    const schedule = parseHours(hours[day] ?? "");
-
-    if (!schedule) continue;
-
-    // If today's opening time has passed, look for the next day instead.
-    if (offset === 0 && now.minutes >= schedule.open) continue;
-
-    const dayLabel =
-      offset === 0 ? "today" : offset === 1 ? "tomorrow" : day;
-
+  // Explain the schedule if Tuesday at 11:30 falls outside opening hours.
+  if (tuesday) {
     return {
       isOpen: false,
-      message: `Closed · opens ${dayLabel} at ${schedule.openText}`,
+      message: `Demo time 11:30 · Tuesday hours are ${tuesday.openText}–${tuesday.closeText}`,
     };
   }
 
   return {
     isOpen: false,
-    message: "Closed · no upcoming opening hours listed",
+    message: "Opening status unavailable · check our hours below",
   };
 }
 
 /**
- * Render an opening status badge that refreshes every minute.
+ * Display the opening status using the component's own props type.
  */
-export default function OpenStatus({ hours }: OpenStatusProps) {
-  const [status, setStatus] = useState<ReturnType<typeof getStatus> | null>(
-    null,
-  );
-
-  useEffect(() => {
-    /**
-     * Refresh the café status using the current Lisbon time.
-     */
-    function updateStatus() {
-      setStatus(getStatus(hours));
-    }
-
-    updateStatus();
-
-    const intervalId = window.setInterval(updateStatus, 60_000);
-
-    return () => window.clearInterval(intervalId);
-  }, [hours]);
-
-  if (!status) {
-    return (
-      <span className="inline-flex rounded-full border border-white/30 px-3 py-2 text-sm text-white">
-        Checking opening hours…
-      </span>
-    );
-  }
+export default function OpenStatus({
+  hours,
+  demoState,
+}: OpenStatusProps) {
+  const status = getDemoStatus(hours, demoState);
 
   return (
     <span
       role="status"
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium ${
+      className={`inline-flex flex-wrap items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium ${
         status.isOpen
           ? "border-green-200/50 bg-green-950/40 text-green-100"
           : "border-white/30 bg-black/30 text-white"
@@ -187,7 +122,7 @@ export default function OpenStatus({ hours }: OpenStatusProps) {
     >
       <span
         aria-hidden="true"
-        className={`size-2 rounded-full ${
+        className={`size-2 shrink-0 rounded-full ${
           status.isOpen ? "bg-green-400" : "bg-stone-300"
         }`}
       />
