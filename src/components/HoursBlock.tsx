@@ -27,6 +27,8 @@ export default function HoursBlock({ hours }: HoursBlockProps) {
     .format(new Date())
     .toLowerCase();
 
+    // console.log(hours["tuesday"]);
+
   return (
     <section
       id="hours"

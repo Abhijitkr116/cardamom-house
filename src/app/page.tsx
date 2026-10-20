@@ -15,14 +15,16 @@ import Navbar from "@/components/Navbar";
 import { restaurantData } from "@/data";
 import { restaurantImages, menuItemImages } from "@/data/images";
 
-type DemoState = "open" | "closed" | "special-sold-out";
+// Defines the actual status and supported URL demo scenarios.
+type DemoState = "actual" | "open" | "closed" | "special-sold-out";
 
+// Defines the props accepted by the homepage.
 type HomePageProps = {
   searchParams: Promise<{ state?: string | string[] }>;
 };
 
 /**
- * Convert menu tags into visitor-friendly labels.
+ * Converts menu tags into visitor-friendly labels.
  */
 function getTagLabel(tag: string): string {
   if (tag === "V") return "Vegetarian";
@@ -31,20 +33,22 @@ function getTagLabel(tag: string): string {
 }
 
 /**
- * Accept supported demo states and default to "open".
+ * Reads a supported demo state from the URL.
+ * Uses actual opening hours when no valid demo state is provided.
  */
 function getDemoState(value: string | string[] | undefined): DemoState {
   const state = Array.isArray(value) ? value[0] : value;
 
-  if (state === "closed" || state === "special-sold-out" || state === "open") {
+  if (state === "open" || state === "closed" || state === "special-sold-out") {
     return state;
   }
 
-  return "open";
+  return "actual";
 }
 
 /**
- * Render the café homepage for the selected URL demo state.
+ * Renders the café homepage using actual status by default
+ * and optional demo states supplied through the URL.
  */
 export default async function HomePage({ searchParams }: HomePageProps) {
   const { restaurant, categories, today_special } = restaurantData;
@@ -52,8 +56,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const demoState = getDemoState(params.state);
 
   /**
-   * Create a demo-only menu copy and mark the featured dish sold out
-   * in the special-sold-out scenario without changing the source JSON.
+   * Creates a separate menu copy for the sold-out demo.
+   * The original JSON data remains unchanged.
    */
   const displayCategories = categories.map((category) => ({
     ...category,
@@ -69,8 +73,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   }));
 
   /**
-   * Find the featured dish in the displayed menu so its callout and
-   * menu card share the same availability status.
+   * Finds the featured dish in the displayed menu so its
+   * availability matches the corresponding menu card.
    */
   const specialItem = displayCategories
     .flatMap((category) => category.items)
@@ -96,7 +100,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           className="object-cover"
         />
 
-        {/* Improve contrast between the hero text and background image. */}
+        {/* Improves contrast between the hero text and background image. */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/25" />
 
         <div className="relative z-10 mx-auto flex min-h-[440px] max-w-7xl items-center px-5 py-14 sm:min-h-[500px] sm:px-8 sm:py-16 lg:min-h-[540px] lg:px-12">
@@ -113,12 +117,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               {restaurant.tagline}
             </p>
 
-            {/* Show the simulated opening status for the chosen scenario. */}
+            {/* Displays actual opening hours or the selected URL demo. */}
             <div className="mt-5">
               <OpenStatus hours={restaurant.hours} demoState={demoState} />
             </div>
 
-            {/* Make the closed scenario clear and friendly. */}
+            {/* Displays an additional message only in the closed demo. */}
             {demoState === "closed" && (
               <div
                 role="status"
@@ -168,52 +172,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </header>
 
       <div className="mx-auto w-full max-w-7xl px-4 py-9 sm:px-8 sm:py-14 lg:px-12 lg:py-16">
-        {/* URL links make it easy to switch between the three demo states. */}
-        <nav
-          aria-label="Demo scenarios"
-          className="mb-8 flex flex-wrap items-center justify-center gap-2"
-        >
-          <span className="mr-1 text-xs font-medium text-muted">
-            Preview state:
-          </span>
-
-          <a
-            href={`/?state=open`}
-            aria-current={demoState === "open" ? "page" : undefined}
-            className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
-              demoState === "open"
-                ? "border-brand bg-brand text-white"
-                : "border-sand bg-surface text-espresso hover:border-brand"
-            }`}
-          >
-            Open
-          </a>
-
-          <a
-            href={`/?state=closed`}
-            aria-current={demoState === "closed" ? "page" : undefined}
-            className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
-              demoState === "closed"
-                ? "border-brand bg-brand text-white"
-                : "border-sand bg-surface text-espresso hover:border-brand"
-            }`}
-          >
-            Closed
-          </a>
-
-          <a
-            href={`/?state=special-sold-out`}
-            aria-current={demoState === "special-sold-out" ? "page" : undefined}
-            className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
-              demoState === "special-sold-out"
-                ? "border-brand bg-brand text-white"
-                : "border-sand bg-surface text-espresso hover:border-brand"
-            }`}
-          >
-            Special sold out
-          </a>
-        </nav>
-
         {/* Today's featured dish */}
         {specialItem && (
           <section
@@ -305,7 +263,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </section>
         )}
 
-        {/* Pass the simulated menu data to the menu component. */}
+        {/* Passes the displayed menu data to the menu component. */}
         <MenuSection categories={displayCategories} />
 
         {/* Opening hours and contact details */}
@@ -332,6 +290,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </p>
           </div>
 
+          {/* Displays the weekly opening hours. */}
           <div className="mx-auto w-full max-w-7xl">
             <HoursBlock hours={restaurant.hours} />
           </div>

@@ -3,25 +3,14 @@
 import Image from "next/image";
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import {
-  RiCheckLine,
-  RiCloseLine,
-  RiFireLine,
-  RiLeafLine,
-  RiRestaurantLine,
-  RiSearchLine,
-  RiStarFill,
-} from "@remixicon/react";
+import { RiCheckLine, RiCloseLine, RiFireLine, RiLeafLine, RiRestaurantLine, RiSearchLine, RiStarFill } from "@remixicon/react";
 import type { RestaurantData, DietaryTag } from "@/types/menu";
 import { menuItemImages } from "@/data/images";
 
 /**
  * Define the available dietary filters and their display labels.
  */
-const dietaryFilters: {
-  value: "all" | DietaryTag;
-  label: string;
-}[] = [
+const dietaryFilters: { value: "all" | DietaryTag; label: string;}[] = [
   { value: "all", label: "All" },
   { value: "V", label: "Vegetarian" },
   { value: "GF", label: "Gluten-free" },
@@ -40,11 +29,7 @@ function getTagLabel(tag: DietaryTag): string {
 /**
  * Display a menu card with its image, price, dietary tags, and availability.
  */
-function MenuItemCard({
-  item,
-  index,
-  reduceMotion,
-}: {
+function MenuItemCard({ item, index, reduceMotion }: {
   item: RestaurantData["categories"][number]["items"][number];
   index: number;
   reduceMotion: boolean;
@@ -72,10 +57,7 @@ function MenuItemCard({
     >
       {imageSrc && (
         <div className="relative h-[76px] w-[76px] shrink-0 self-start overflow-hidden rounded-lg bg-cream sm:h-24 sm:w-24">
-          <Image
-            src={imageSrc}
-            alt={item.name}
-            fill
+          <Image src={imageSrc} alt={item.name} fill
             sizes="(max-width: 639px) 76px, 96px"
             className={`object-cover transition-all duration-300 ${
               isSoldOut ? "grayscale opacity-60" : ""
@@ -95,11 +77,9 @@ function MenuItemCard({
             {item.name}
           </h4>
 
-          <p
-            className={`shrink-0 whitespace-nowrap text-sm font-bold tabular-nums sm:text-base ${
+          <p className={`shrink-0 whitespace-nowrap text-sm font-bold tabular-nums sm:text-base ${
               isSoldOut ? "text-muted line-through" : "text-brand"
-            }`}
-          >
+            }`}>
             €{item.price.toFixed(2)}
           </p>
         </div>
