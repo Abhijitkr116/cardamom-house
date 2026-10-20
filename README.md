@@ -74,6 +74,9 @@ A modern, responsive café website inspired by the charm of Lisbon, Portugal. Ca
 
 ## 📁 Project Structure
 
+## 📁 Project Structure
+
+```text
 cardamom-house/
 ├── public/
 ├── src/
@@ -101,6 +104,7 @@ cardamom-house/
 ├── tsconfig.json
 ├── postcss.config.mjs
 └── README.md
+```
 
 ## 🌐 Deployment
 
