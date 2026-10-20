@@ -72,8 +72,10 @@ A modern, responsive café website inspired by the charm of Lisbon, Portugal. Ca
 | `npm run start` | Starts the production server |
 | `npm run lint` | Runs linting, if configured in the project |
 
+
 ## 📁 Project Structure
 
+```text
 cardamom-house/
 ├── public/
 ├── src/
@@ -101,6 +103,7 @@ cardamom-house/
 ├── tsconfig.json
 ├── postcss.config.mjs
 └── README.md
+```
 
 ## 🌐 Deployment
 
