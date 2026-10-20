@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   RiCloseLine,
@@ -16,7 +15,7 @@ import {
  */
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
   const navLinks = [
@@ -26,12 +25,8 @@ export default function Navbar() {
     { label: "Visit Us", href: "#visit" },
   ];
 
-  /**
-   * Sync the toggle state with the theme applied by the root layout.
-   */
-  useEffect(() => {
-    setIsDarkMode(document.documentElement.classList.contains("dark"));
-  }, []);
+  // Reads the current theme from the document, falling back to the saved state.
+  const darkMode = isDarkMode ?? false;
 
   /**
    * Toggle the mobile navigation menu open or closed.
@@ -51,10 +46,10 @@ export default function Navbar() {
    * Toggle the page theme and save the visitor's preference.
    */
   function handleThemeToggle() {
-    const nextIsDarkMode = !isDarkMode;
+    const nextIsDarkMode = !document.documentElement.classList.contains("dark");
 
-    setIsDarkMode(nextIsDarkMode);
     document.documentElement.classList.toggle("dark", nextIsDarkMode);
+    setIsDarkMode(nextIsDarkMode);
 
     try {
       localStorage.setItem(
@@ -99,13 +94,13 @@ export default function Navbar() {
             type="button"
             onClick={handleThemeToggle}
             aria-label={
-              isDarkMode ? "Switch to light mode" : "Switch to dark mode"
+              darkMode ? "Switch to light mode" : "Switch to dark mode"
             }
-            aria-pressed={isDarkMode}
-            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+            aria-pressed={darkMode}
+            title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             className="inline-flex size-11 items-center justify-center rounded-full border border-sand text-espresso transition-colors hover:bg-sand/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
-            {isDarkMode ? (
+            {darkMode ? (
               <RiSunLine size={21} aria-hidden="true" />
             ) : (
               <RiMoonLine size={21} aria-hidden="true" />

@@ -36,27 +36,27 @@ function parseHours(schedule: string): ParsedHours | null {
 
   if (!matches) return null;
 
-  const openHour = Number(matches[1]);
-  const openMinute = Number(matches[2]);
-  const closeHour = Number(matches[3]);
-  const closeMinute = Number(matches[4]);
+  const openHour = Number(matches[1]); // 08
+  const openMinute = Number(matches[2]); // 00
+  const closeHour = Number(matches[3]); // 15
+  const closeMinute = Number(matches[4]); // 00
 
   // Rejects invalid 24-hour clock values.
   if (openHour > 23 || closeHour > 23 || openMinute > 59 || closeMinute > 59) {
     return null;
   }
 
-  const open = openHour * 60 + openMinute;
-  const close = closeHour * 60 + closeMinute;
+  const open = openHour * 60 + openMinute; // 480 minutes
+  const close = closeHour * 60 + closeMinute; // 900 minutes
 
   // Supports opening and closing on the same day only.
   if (close <= open) return null;
 
   return {
-    open,
-    close,
-    openText: `${String(openHour).padStart(2, "0")}:${String(openMinute).padStart(2, "0")}`,
-    closeText: `${String(closeHour).padStart(2, "0")}:${String(closeMinute).padStart(2, "0")}`,
+    open, // 480
+    close, // 900
+    openText: `${String(openHour).padStart(2, "0")}:${String(openMinute).padStart(2, "0")}`, // 08:00
+    closeText: `${String(closeHour).padStart(2, "0")}:${String(closeMinute).padStart(2, "0")}`, // 15:00
   };
 }
 
@@ -69,7 +69,10 @@ function getLocalTime() {
     minute: "2-digit",
     hourCycle: "h23",
   }).formatToParts(new Date());
-  
+
+  // console.log(getLocalTime())
+
+
   // Retrieves an individual part from the formatted local time.
   const get = (type: string) =>
     parts.find((part) => part.type === type)?.value ?? "";
